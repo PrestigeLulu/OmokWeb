@@ -1,0 +1,41 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(19, 30px);
+  grid-template-rows: repeat(19, 30px);
+  gap: 1px;
+  background-color: #d1a45f;
+  border: 3px solid #8b4513;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  background-color: #d1a45f;
+  position: relative;
+  border: 1px solid #8b4513;
+}
+
+.stone {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.stone.black {
+  background-color: black;
+}
+
+.stone.white {
+  background-color: white;
+}
