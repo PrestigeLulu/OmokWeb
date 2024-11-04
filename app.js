@@ -10,7 +10,7 @@ app.use(express.static("public"));
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const boardSize = 19;
+const boardSize = 15;
 const board = Array.from({ length: boardSize }, () =>
   Array(boardSize).fill(null)
 );
