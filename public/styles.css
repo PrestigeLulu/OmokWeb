@@ -9,16 +9,16 @@ body {
 
 #board {
   display: grid;
-  grid-template-columns: repeat(15, 50px);
-  grid-template-rows: repeat(15, 50px);
+  grid-template-columns: repeat(19, 30px);
+  grid-template-rows: repeat(19, 30px);
   gap: 1px;
   background-color: #d1a45f;
   border: 3px solid #8b4513;
 }
 
 .cell {
-  width: 50px;
-  height: 0px;
+  width: 30px;
+  height: 30px;
   background-color: #d1a45f;
   position: relative;
   border: 1px solid #8b4513;

@@ -1,5 +1,5 @@
 const socket = io();
-const boardSize = 15;
+const boardSize = 19;
 
 const board = document.getElementById("board");
 let isBlackTurn = true; // 흑돌과 백돌 교차로 놓기 위한 변수
