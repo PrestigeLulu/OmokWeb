@@ -25,7 +25,7 @@ for (let i = 0; i < boardSize * boardSize; i++) {
       col,
       color: isBlackTurn ? "black" : "white",
     });
-    // isBlackTurn = !isBlackTurn; // 턴 변경
+    isBlackTurn = !isBlackTurn; // 턴 변경
   });
 
   board.appendChild(cell);
