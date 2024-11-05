@@ -19,9 +19,6 @@ for (let i = 0; i < boardSize * boardSize; i++) {
     // stone.classList.add("stone");
     // stone.classList.add(isBlackTurn ? "black" : "white");
     // cell.appendChild(stone);
-    if (!isBlackTurn) {
-      return;
-    }
     console.log(row, col);
     socket.emit("placeStone", {
       row,
