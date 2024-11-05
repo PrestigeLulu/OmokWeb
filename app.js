@@ -17,9 +17,9 @@ const board = Array.from({ length: boardSize }, () =>
 
 io.on("connection", (socket) => {
   socket.on("placeStone", (data) => {
-    board[data.row][data.col] = "black";
+    board[data.row][data.col] = data.color;
     const bestMove = getBestMove();
-    board[bestMove.row][bestMove.col] = "white";
+    // board[bestMove.row][bestMove.col] = "white";
     io.emit("set_pos", [bestMove.row, bestMove.col]);
     io.emit("omok:update", board);
   });

@@ -26,6 +26,7 @@ for (let i = 0; i < boardSize * boardSize; i++) {
     socket.emit("placeStone", {
       row,
       col,
+      color: isBlackTurn ? "black" : "white",
     });
     // isBlackTurn = !isBlackTurn; // 턴 변경
   });
