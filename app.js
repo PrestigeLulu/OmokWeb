@@ -52,7 +52,7 @@ function getBestMove() {
 }
 
 function minimax(board, depth, isMaximizingPlayer, alpha, beta) {
-  if (depth === 0 || isGameOver(board)) {
+  if (depth === 0) {
     return { score: evaluateBoard(board) };
   }
 
