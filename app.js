@@ -129,6 +129,14 @@ function getPossibleMoves(board) {
 
 function evaluateBoard(board) {
   let score = 0;
+  const winner = isGameOver(board);
+  if (winner !== null) {
+    if (winner === "black") {
+      return isMaximizingPlayer ? 1000000 : -1000000;
+    } else if (winner === "white") {
+      return isMaximizingPlayer ? -1000000 : 1000000;
+    }
+  }
 
   const directions = [
     { dr: 0, dc: 1 }, // 수평
@@ -263,11 +271,43 @@ function getLineScore(count, openEnds, isBlack) {
 }
 
 function isGameOver(board) {
-  // 게임 종료 조건을 확인하는 함수
-  // 예: 5개의 연속된 돌이 있는지 확인
-  // 간단한 구현으로는 false를 반환
-  return false;
+  // 방향 벡터
+  const directions = [
+    { dr: 0, dc: 1 }, // 수평
+    { dr: 1, dc: 0 }, // 수직
+    { dr: 1, dc: 1 }, // 대각선 \
+    { dr: 1, dc: -1 }, // 대각선 /
+  ];
+
+  for (let row = 0; row < boardSize; row++) {
+    for (let col = 0; col < boardSize; col++) {
+      const player = board[row][col];
+      if (player !== null) {
+        for (const { dr, dc } of directions) {
+          let count = 1;
+          let r = row + dr;
+          let c = col + dc;
+          while (
+            r >= 0 &&
+            r < boardSize &&
+            c >= 0 &&
+            c < boardSize &&
+            board[r][c] === player
+          ) {
+            count++;
+            if (count === 5) {
+              return player; // 승리한 플레이어의 색상을 반환
+            }
+            r += dr;
+            c += dc;
+          }
+        }
+      }
+    }
+  }
+  return null; // 아직 승자가 없음
 }
+
 server.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
