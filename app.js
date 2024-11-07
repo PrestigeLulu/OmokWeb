@@ -127,53 +127,139 @@ function getPossibleMoves(board) {
   return moves;
 }
 
-// 평가 함수는 이전 코드와 동일하게 유지하거나 개선할 수 있습니다.
-
 function evaluateBoard(board) {
   let score = 0;
 
-  // 간단한 평가 기준: 연속된 돌의 개수에 따라 점수 부여
   const directions = [
-    { dr: 0, dc: 1 }, // Horizontal
-    { dr: 1, dc: 0 }, // Vertical
-    { dr: 1, dc: 1 }, // Diagonal \
-    { dr: 1, dc: -1 }, // Diagonal /
+    { dr: 0, dc: 1 }, // 수평
+    { dr: 1, dc: 0 }, // 수직
+    { dr: 1, dc: 1 }, // 대각선 \
+    { dr: 1, dc: -1 }, // 대각선 /
   ];
 
   for (let row = 0; row < boardSize; row++) {
     for (let col = 0; col < boardSize; col++) {
       if (board[row][col] !== null) {
         const color = board[row][col];
+
         directions.forEach(({ dr, dc }) => {
-          let count = 0;
-          for (let i = 0; i < 5; i++) {
-            const r = row + i * dr;
-            const c = col + i * dc;
-            if (
-              r >= 0 &&
-              r < boardSize &&
-              c >= 0 &&
-              c < boardSize &&
-              board[r][c] === color
-            ) {
-              count++;
-            } else {
-              break;
-            }
-          }
-          if (count === 5) {
-            score += color === "black" ? 100 : -100;
-          } else if (count === 4) {
-            score += color === "black" ? 10 : -10;
-          } else if (count === 3) {
-            score += color === "black" ? 5 : -5;
-          }
+          const lineScore = evaluateLine(board, row, col, dr, dc, color);
+          score += lineScore;
         });
       }
     }
   }
 
   return score;
+}
+
+function evaluateLine(board, row, col, dr, dc, color) {
+  let count = 1;
+  let openEnds = 0;
+
+  // 앞으로 탐색
+  let i = 1;
+  while (true) {
+    const r = row + i * dr;
+    const c = col + i * dc;
+    if (
+      r >= 0 &&
+      r < boardSize &&
+      c >= 0 &&
+      c < boardSize &&
+      board[r][c] === color
+    ) {
+      count++;
+      i++;
+    } else {
+      if (
+        r >= 0 &&
+        r < boardSize &&
+        c >= 0 &&
+        c < boardSize &&
+        board[r][c] === null
+      ) {
+        openEnds++;
+      }
+      break;
+    }
+  }
+
+  // 반대로 탐색
+  i = 1;
+  while (true) {
+    const r = row - i * dr;
+    const c = col - i * dc;
+    if (
+      r >= 0 &&
+      r < boardSize &&
+      c >= 0 &&
+      c < boardSize &&
+      board[r][c] === color
+    ) {
+      count++;
+      i++;
+    } else {
+      if (
+        r >= 0 &&
+        r < boardSize &&
+        c >= 0 &&
+        c < boardSize &&
+        board[r][c] === null
+      ) {
+        openEnds++;
+      }
+      break;
+    }
+  }
+
+  // 점수 계산
+  const isBlack = color === "black";
+  const lineScore = getLineScore(count, openEnds, isBlack);
+  return lineScore;
+}
+
+function getLineScore(count, openEnds, isBlack) {
+  if (openEnds === 0 && count < 5) {
+    return 0;
+  }
+
+  let score = 0;
+
+  switch (count) {
+    case 5:
+      score = 100000;
+      break;
+    case 4:
+      if (openEnds === 2) {
+        score = 10000; // 열린 사
+      } else if (openEnds === 1) {
+        score = 1000; // 막힌 사
+      }
+      break;
+    case 3:
+      if (openEnds === 2) {
+        score = 1000; // 열린 삼
+      } else if (openEnds === 1) {
+        score = 100; // 막힌 삼
+      }
+      break;
+    case 2:
+      if (openEnds === 2) {
+        score = 100; // 열린 이
+      } else if (openEnds === 1) {
+        score = 10; // 막힌 이
+      }
+      break;
+    case 1:
+      if (openEnds === 2) {
+        score = 10; // 열린 일
+      }
+      break;
+  }
+
+  // 공격과 방어의 가중치 조정
+  return isBlack ? score : -score * 0.8; // 상대방의 점수에 가중치 적용
 }
 
 function isGameOver(board) {
