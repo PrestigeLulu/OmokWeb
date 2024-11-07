@@ -38,35 +38,34 @@ io.on("connection", (socket) => {
 });
 
 function getBestMove() {
-  const weights = Array.from({ length: boardSize }, () =>
-    Array(boardSize).fill(0)
-  );
+  const depth = 3; // 탐색 깊이 설정
+  const isMaximizingPlayer = true; // AI는 최대화 플레이어
+  const bestMove = minimax(board, depth, isMaximizingPlayer);
+  return bestMove.move;
+}
 
-  // Calculate weights based on existing stones
-  for (let row = 0; row < boardSize; row++) {
-    for (let col = 0; col < boardSize; col++) {
-      if (board[row][col] === "black") {
-        adjustWeights(weights, row, col, -1);
-        checkForThreeInARow(weights, row, col, "black");
-      } else if (board[row][col] === "white") {
-        adjustWeights(weights, row, col, 1);
-        checkForThreeInARow(weights, row, col, "white");
-      }
-    }
+function minimax(board, depth, isMaximizingPlayer) {
+  if (depth === 0 || isGameOver(board)) {
+    return { score: evaluateBoard(board) };
   }
 
-  // Find the best move considering both blocking and winning
-  let bestMove = { row: 0, col: 0 };
-  let minWeight = Infinity;
+  let bestMove = { score: isMaximizingPlayer ? -Infinity : Infinity };
+
   for (let row = 0; row < boardSize; row++) {
     for (let col = 0; col < boardSize; col++) {
       if (board[row][col] === null) {
-        if (weights[row][col] === -50) {
-          // Prioritize blocking moves
-          return { row, col };
-        } else if (weights[row][col] < minWeight) {
-          minWeight = weights[row][col];
-          bestMove = { row, col };
+        board[row][col] = isMaximizingPlayer ? "black" : "white";
+        const result = minimax(board, depth - 1, !isMaximizingPlayer);
+        board[row][col] = null;
+
+        if (isMaximizingPlayer) {
+          if (result.score > bestMove.score) {
+            bestMove = { score: result.score, move: { row, col } };
+          }
+        } else {
+          if (result.score < bestMove.score) {
+            bestMove = { score: result.score, move: { row, col } };
+          }
         }
       }
     }
@@ -75,24 +74,10 @@ function getBestMove() {
   return bestMove;
 }
 
-function adjustWeights(weights, row, col, value) {
-  for (let i = -1; i <= 1; i++) {
-    for (let j = -1; j <= 1; j++) {
-      const newRow = row + i;
-      const newCol = col + j;
-      if (
-        newRow >= 0 &&
-        newRow < boardSize &&
-        newCol >= 0 &&
-        newCol < boardSize
-      ) {
-        weights[newRow][newCol] += value;
-      }
-    }
-  }
-}
+function evaluateBoard(board) {
+  let score = 0;
 
-function checkForThreeInARow(weights, row, col, color) {
+  // 간단한 평가 기준: 연속된 돌의 개수에 따라 점수 부여
   const directions = [
     { dr: 0, dc: 1 }, // Horizontal
     { dr: 1, dc: 0 }, // Vertical
@@ -100,55 +85,47 @@ function checkForThreeInARow(weights, row, col, color) {
     { dr: 1, dc: -1 }, // Diagonal /
   ];
 
-  directions.forEach(({ dr, dc }) => {
-    let count = 0;
-    let startRow = row;
-    let startCol = col;
-
-    // Check in one direction
-    for (let i = 0; i < 3; i++) {
-      const r = startRow + i * dr;
-      const c = startCol + i * dc;
-      if (
-        r >= 0 &&
-        r < boardSize &&
-        c >= 0 &&
-        c < boardSize &&
-        board[r][c] === color
-      ) {
-        count++;
-      } else {
-        break;
+  for (let row = 0; row < boardSize; row++) {
+    for (let col = 0; col < boardSize; col++) {
+      if (board[row][col] !== null) {
+        const color = board[row][col];
+        directions.forEach(({ dr, dc }) => {
+          let count = 0;
+          for (let i = 0; i < 5; i++) {
+            const r = row + i * dr;
+            const c = col + i * dc;
+            if (
+              r >= 0 &&
+              r < boardSize &&
+              c >= 0 &&
+              c < boardSize &&
+              board[r][c] === color
+            ) {
+              count++;
+            } else {
+              break;
+            }
+          }
+          if (count === 5) {
+            score += color === "black" ? 100 : -100;
+          } else if (count === 4) {
+            score += color === "black" ? 10 : -10;
+          } else if (count === 3) {
+            score += color === "black" ? 5 : -5;
+          }
+        });
       }
     }
+  }
 
-    // If three in a row, adjust weights at both ends
-    if (count === 3) {
-      const beforeRow = startRow - dr;
-      const beforeCol = startCol - dc;
-      const afterRow = startRow + 3 * dr;
-      const afterCol = startCol + 3 * dc;
+  return score;
+}
 
-      if (
-        beforeRow >= 0 &&
-        beforeRow < boardSize &&
-        beforeCol >= 0 &&
-        beforeCol < boardSize &&
-        board[beforeRow][beforeCol] === null
-      ) {
-        weights[beforeRow][beforeCol] = -50;
-      }
-      if (
-        afterRow >= 0 &&
-        afterRow < boardSize &&
-        afterCol >= 0 &&
-        afterCol < boardSize &&
-        board[afterRow][afterCol] === null
-      ) {
-        weights[afterRow][afterCol] = -50;
-      }
-    }
-  });
+function isGameOver(board) {
+  // 게임 종료 조건을 확인하는 함수
+  // 예: 5개의 연속된 돌이 있는지 확인
+  // 간단한 구현으로는 false를 반환
+  return false;
 }
 
 server.listen(3000, () => {
