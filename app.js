@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
     if (data.color === "black") {
       const bestMove = getBestMove();
       console.log(bestMove);
-      io.emit("set_pos", [bestMove.row, bestMove.col]);
+      io.emit("set_pos", [bestMove.move.row, bestMove.move.col]);
     }
   });
   socket.on("omok:reset", () => {
