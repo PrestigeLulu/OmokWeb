@@ -52,7 +52,7 @@ function getBestMove() {
 }
 
 function minimax(board, depth, isMaximizingPlayer, alpha, beta) {
-  if (depth === 0) {
+  if (depth === 0 || isGameOver(board)) {
     return { score: evaluateBoard(board) };
   }
 
@@ -128,6 +128,59 @@ function getPossibleMoves(board) {
 
 // 평가 함수는 이전 코드와 동일하게 유지하거나 개선할 수 있습니다.
 
+function evaluateBoard(board) {
+  let score = 0;
+
+  // 간단한 평가 기준: 연속된 돌의 개수에 따라 점수 부여
+  const directions = [
+    { dr: 0, dc: 1 }, // Horizontal
+    { dr: 1, dc: 0 }, // Vertical
+    { dr: 1, dc: 1 }, // Diagonal \
+    { dr: 1, dc: -1 }, // Diagonal /
+  ];
+
+  for (let row = 0; row < boardSize; row++) {
+    for (let col = 0; col < boardSize; col++) {
+      if (board[row][col] !== null) {
+        const color = board[row][col];
+        directions.forEach(({ dr, dc }) => {
+          let count = 0;
+          for (let i = 0; i < 5; i++) {
+            const r = row + i * dr;
+            const c = col + i * dc;
+            if (
+              r >= 0 &&
+              r < boardSize &&
+              c >= 0 &&
+              c < boardSize &&
+              board[r][c] === color
+            ) {
+              count++;
+            } else {
+              break;
+            }
+          }
+          if (count === 5) {
+            score += color === "black" ? 100 : -100;
+          } else if (count === 4) {
+            score += color === "black" ? 10 : -10;
+          } else if (count === 3) {
+            score += color === "black" ? 5 : -5;
+          }
+        });
+      }
+    }
+  }
+
+  return score;
+}
+
+function isGameOver(board) {
+  // 게임 종료 조건을 확인하는 함수
+  // 예: 5개의 연속된 돌이 있는지 확인
+  // 간단한 구현으로는 false를 반환
+  return false;
+}
 server.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
