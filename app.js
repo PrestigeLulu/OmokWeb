@@ -21,7 +21,7 @@ io.on("connection", (socket) => {
     io.emit("omok:update", board);
     if (data.color === "black") {
       const bestMove = getBestMove();
-      io.emit("set_pos", [bestMove.move.row, bestMove.move.col]);
+      io.emit("set_pos", [bestMove.row, bestMove.col]);
     }
   });
   socket.on("omok:reset", () => {
