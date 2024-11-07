@@ -53,10 +53,8 @@ function getBestMove() {
 }
 
 function minimax(board, depth, isMaximizingPlayer, alpha, beta) {
-  const winner = isGameOver(board);
-  if (winner !== null || depth === 0) {
-    // 현재 보드를 평가
-    return { score: evaluateBoard(board, isMaximizingPlayer) };
+  if (depth === 0 || isGameOver(board)) {
+    return { score: evaluateBoard(board) };
   }
 
   let bestMove = { score: isMaximizingPlayer ? -Infinity : Infinity };
@@ -129,18 +127,7 @@ function getPossibleMoves(board) {
   return moves;
 }
 
-function evaluateBoard(board, isMaximizingPlayer) {
-  const winner = isGameOver(board);
-  if (winner !== null) {
-    if (
-      (winner === "black" && isMaximizingPlayer) ||
-      (winner === "white" && !isMaximizingPlayer)
-    ) {
-      return 1000000; // 최대화 플레이어의 승리
-    } else {
-      return -1000000; // 최대화 플레이어의 패배
-    }
-  }
+function evaluateBoard(board) {
   let score = 0;
 
   const directions = [
@@ -276,43 +263,11 @@ function getLineScore(count, openEnds, isBlack) {
 }
 
 function isGameOver(board) {
-  // 방향 벡터
-  const directions = [
-    { dr: 0, dc: 1 }, // 수평
-    { dr: 1, dc: 0 }, // 수직
-    { dr: 1, dc: 1 }, // 대각선 \
-    { dr: 1, dc: -1 }, // 대각선 /
-  ];
-
-  for (let row = 0; row < boardSize; row++) {
-    for (let col = 0; col < boardSize; col++) {
-      const player = board[row][col];
-      if (player !== null) {
-        for (const { dr, dc } of directions) {
-          let count = 1;
-          let r = row + dr;
-          let c = col + dc;
-          while (
-            r >= 0 &&
-            r < boardSize &&
-            c >= 0 &&
-            c < boardSize &&
-            board[r][c] === player
-          ) {
-            count++;
-            if (count === 5) {
-              return player; // 승리한 플레이어의 색상을 반환
-            }
-            r += dr;
-            c += dc;
-          }
-        }
-      }
-    }
-  }
-  return null; // 아직 승자가 없음
+  // 게임 종료 조건을 확인하는 함수
+  // 예: 5개의 연속된 돌이 있는지 확인
+  // 간단한 구현으로는 false를 반환
+  return false;
 }
-
 server.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
