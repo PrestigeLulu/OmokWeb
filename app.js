@@ -53,8 +53,10 @@ function getBestMove() {
 }
 
 function minimax(board, depth, isMaximizingPlayer, alpha, beta) {
-  if (depth === 0 || isGameOver(board)) {
-    return { score: evaluateBoard(board) };
+  const winner = isGameOver(board);
+  if (winner !== null || depth === 0) {
+    // 현재 보드를 평가
+    return { score: evaluateBoard(board, isMaximizingPlayer) };
   }
 
   let bestMove = { score: isMaximizingPlayer ? -Infinity : Infinity };
@@ -127,16 +129,19 @@ function getPossibleMoves(board) {
   return moves;
 }
 
-function evaluateBoard(board) {
-  let score = 0;
+function evaluateBoard(board, isMaximizingPlayer) {
   const winner = isGameOver(board);
   if (winner !== null) {
-    if (winner === "black") {
-      return isMaximizingPlayer ? 1000000 : -1000000;
-    } else if (winner === "white") {
-      return isMaximizingPlayer ? -1000000 : 1000000;
+    if (
+      (winner === "black" && isMaximizingPlayer) ||
+      (winner === "white" && !isMaximizingPlayer)
+    ) {
+      return 1000000; // 최대화 플레이어의 승리
+    } else {
+      return -1000000; // 최대화 플레이어의 패배
     }
   }
+  let score = 0;
 
   const directions = [
     { dr: 0, dc: 1 }, // 수평
