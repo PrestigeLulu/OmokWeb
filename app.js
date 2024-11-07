@@ -18,12 +18,12 @@ const board = Array.from({ length: boardSize }, () =>
 io.on("connection", (socket) => {
   socket.on("placeStone", (data) => {
     board[data.row][data.col] = data.color;
+    io.emit("omok:update", board);
     if (data.color === "black") {
       const bestMove = getBestMove();
       console.log(bestMove);
       io.emit("set_pos", [bestMove.row, bestMove.col]);
     }
-    io.emit("omok:update", board);
   });
   socket.on("omok:reset", () => {
     board.forEach((row) => row.fill(null));
