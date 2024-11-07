@@ -21,7 +21,6 @@ io.on("connection", (socket) => {
     io.emit("omok:update", board);
     if (data.color === "black") {
       const bestMove = getBestMove();
-      console.log(bestMove);
       io.emit("set_pos", [bestMove.move.row, bestMove.move.col]);
     }
   });
@@ -38,9 +37,11 @@ io.on("connection", (socket) => {
 });
 
 function getBestMove() {
-  const depth = 3; // 탐색 깊이 설정
+  const depth = 1; // 탐색 깊이 설정
   const isMaximizingPlayer = true; // AI는 최대화 플레이어
+  console.log("getting best move");
   const bestMove = minimax(board, depth, isMaximizingPlayer);
+  console.log("best move", bestMove);
   return bestMove.move;
 }
 
