@@ -12,9 +12,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const boardSize = 19;
-const board = Array.from({ length: boardSize }, () =>
-  Array(boardSize).fill(null)
-);
+const boards = {}; // 각 클라이언트에 대한 보드 상태를 저장
 
 // 오목 승리 조건을 확인하는 함수
 function checkWin(board, row, col, color) {
@@ -71,52 +69,56 @@ function checkWin(board, row, col, color) {
 }
 
 io.on("connection", (socket) => {
+  // 새로운 클라이언트가 접속할 때 보드 초기화
+  boards[socket.id] = Array.from({ length: boardSize }, () =>
+    Array(boardSize).fill(null)
+  );
+
   socket.on("placeStoneWithoutAi", (data) => {
+    const board = boards[socket.id];
     board[data.row][data.col] = data.color;
-    io.emit("omok:update", board);
+    io.to(socket.id).emit("omok:update", board);
   });
+
   socket.on("placeStone", (data) => {
+    const board = boards[socket.id];
     const testmode = data.testmode;
     board[data.row][data.col] = data.color;
-    io.emit("omok:update", board);
+    io.to(socket.id).emit("omok:update", board);
 
     if (checkWin(board, data.row, data.col, data.color)) {
-      io.emit("omok:win", { winner: data.color });
+      io.to(socket.id).emit("omok:win", { winner: data.color });
       return;
     }
 
-    // AI가 두는 돌의 색깔을 결정
     const aiColor = data.playerTeam === "black" ? "white" : "black";
 
     if (data.playerTeam === data.color) {
-      // AI의 다음 수 계산 및 두기
       const bestMove = findBestMove(board, aiColor);
-      // board[bestMove.row][bestMove.col] = aiColor;
       console.log("bestMove", [bestMove.row, bestMove.col]);
-      io.emit("omok:update", board);
+      io.to(socket.id).emit("omok:update", board);
 
-      // AI가 돌을 놓을 때 도봇에게 신호를 보냄
       if (!testmode) {
-        io.emit("set_pos", [bestMove.row, bestMove.col]);
+        io.to(socket.id).emit("set_pos", [bestMove.row, bestMove.col]);
       } else {
         board[bestMove.row][bestMove.col] = aiColor;
-        io.emit("omok:update", board);
+        io.to(socket.id).emit("omok:update", board);
       }
 
       if (checkWin(board, bestMove.row, bestMove.col, aiColor)) {
-        io.emit("omok:win", { winner: aiColor });
+        io.to(socket.id).emit("omok:win", { winner: aiColor });
       }
     }
   });
 
   socket.on("omok:reset", () => {
+    const board = boards[socket.id];
     board.forEach((row) => row.fill(null));
-    io.emit("omok:update", board);
+    io.to(socket.id).emit("omok:update", board);
   });
 
   socket.on("disconnect", () => {
-    board.forEach((row) => row.fill(null));
-    io.emit("omok:update", board);
+    delete boards[socket.id]; // 클라이언트가 연결을 끊을 때 보드 삭제
   });
 });
 
