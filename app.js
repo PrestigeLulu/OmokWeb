@@ -99,7 +99,10 @@ io.on("connection", (socket) => {
       io.to(socket.id).emit("omok:update", board);
 
       if (!testmode) {
-        io.to(socket.id).emit("set_pos", [bestMove.row, bestMove.col]);
+        io.to(socket.id).emit(`set_pos_${data.channel}`, [
+          bestMove.row,
+          bestMove.col,
+        ]);
       } else {
         board[bestMove.row][bestMove.col] = aiColor;
         io.to(socket.id).emit("omok:update", board);
