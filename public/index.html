@@ -8,6 +8,18 @@
   </head>
   <body>
     <div id="board"></div>
+    <div id="modal">
+      <div id="colorChoice">
+        <p>돌 색깔을 선택하세요:</p>
+        <button id="black">흑</button>
+        <button id="white">백</button>
+      </div>
+    </div>
+    <div id="result">
+      <p>결과</p>
+      <p id="resultText"></p>
+      <button id="reset">다시 시작</button>
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
   </body>

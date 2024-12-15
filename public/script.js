@@ -2,7 +2,31 @@ const socket = io();
 const boardSize = 19;
 
 const board = document.getElementById("board");
+
+const TEST_MODE = false;
+
+let playerTeam;
 let isBlackTurn = true; // 흑돌과 백돌 교차로 놓기 위한 변수
+
+// 색깔 선택 버튼 이벤트 리스너 추가
+document.getElementById("black").addEventListener("click", () => {
+  isBlackTurn = true;
+  playerTeam = "black";
+  document.getElementById("modal").style.display = "none";
+});
+
+document.getElementById("white").addEventListener("click", () => {
+  isBlackTurn = false;
+  playerTeam = "white";
+  document.getElementById("modal").style.display = "none";
+  // 흑돌을 정중앙에 놓기
+  const center = Math.floor(boardSize / 2);
+  socket.emit("placeStoneWithoutAi", {
+    row: center,
+    col: center,
+    color: "black",
+  });
+});
 
 // 19x19 그리드 생성
 for (let i = 0; i < boardSize * boardSize; i++) {
@@ -15,17 +39,16 @@ for (let i = 0; i < boardSize * boardSize; i++) {
     if (cell.hasChildNodes()) {
       return;
     }
-    // const stone = document.createElement("div");
-    // stone.classList.add("stone");
-    // stone.classList.add(isBlackTurn ? "black" : "white");
-    // cell.appendChild(stone);
     console.log(row, col);
     socket.emit("placeStone", {
       row,
       col,
       color: isBlackTurn ? "black" : "white",
+      playerTeam: playerTeam,
     });
-    isBlackTurn = !isBlackTurn; // 턴 변경
+    if (!TEST_MODE) {
+      isBlackTurn = !isBlackTurn;
+    }
   });
 
   board.appendChild(cell);
@@ -39,9 +62,22 @@ socket.on("omok:update", (board) => {
         return;
       }
       const cell1 = document.getElementById(`${i}-${j}`);
-      const stone = document.createElement("div");
-      stone.classList.add("stone", data == "black" ? "black" : "white");
-      cell1.appendChild(stone);
+      if (!cell1.hasChildNodes()) {
+        const stone = document.createElement("div");
+        stone.classList.add("stone", data == "black" ? "black" : "white");
+        cell1.appendChild(stone);
+      }
     });
   });
+});
+
+socket.on("omok:win", (data) => {
+  document.getElementById("resultText").innerText = `${
+    data.winner === "black" ? "흑" : "백"
+  } 승리!`;
+  document.getElementById("result").style.display = "flex";
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  location.reload();
 });
