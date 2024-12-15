@@ -11,8 +11,6 @@ app.use(express.static("public"));
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const TEST_MODE = false;
-
 const boardSize = 19;
 const board = Array.from({ length: boardSize }, () =>
   Array(boardSize).fill(null)
@@ -78,6 +76,7 @@ io.on("connection", (socket) => {
     io.emit("omok:update", board);
   });
   socket.on("placeStone", (data) => {
+    const testmode = data.testmode;
     board[data.row][data.col] = data.color;
     io.emit("omok:update", board);
 
@@ -97,7 +96,7 @@ io.on("connection", (socket) => {
       io.emit("omok:update", board);
 
       // AI가 돌을 놓을 때 도봇에게 신호를 보냄
-      if (!TEST_MODE) {
+      if (!testmode) {
         io.emit("set_pos", [bestMove.row, bestMove.col]);
       } else {
         board[bestMove.row][bestMove.col] = aiColor;

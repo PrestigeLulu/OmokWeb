@@ -150,3 +150,9 @@ body {
 #result button:hover {
   background-color: #8b4513;
 }
+
+#toggle {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+}

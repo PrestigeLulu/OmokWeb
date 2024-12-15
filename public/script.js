@@ -3,7 +3,7 @@ const boardSize = 19;
 
 const board = document.getElementById("board");
 
-const TEST_MODE = false;
+let TEST_MODE = false;
 
 let playerTeam;
 let isBlackTurn = true; // 흑돌과 백돌 교차로 놓기 위한 변수
@@ -45,6 +45,7 @@ for (let i = 0; i < boardSize * boardSize; i++) {
       col,
       color: isBlackTurn ? "black" : "white",
       playerTeam: playerTeam,
+      testmode: TEST_MODE,
     });
     if (!TEST_MODE) {
       isBlackTurn = !isBlackTurn;
@@ -80,4 +81,8 @@ socket.on("omok:win", (data) => {
 
 document.getElementById("reset").addEventListener("click", () => {
   location.reload();
+});
+
+document.getElementById("toggleButton").addEventListener("click", () => {
+  TEST_MODE = !TEST_MODE;
 });
