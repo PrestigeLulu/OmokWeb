@@ -59,14 +59,35 @@ body {
   height: 100%;
   border-radius: 50%;
   pointer-events: none;
+  transition: background-color 0.5s ease;
 }
 
 .stone.black {
   background-color: black;
+  animation: blackToWhite 0.5s forwards;
 }
 
 .stone.white {
   background-color: white;
+  animation: whiteToBlack 0.5s forwards;
+}
+
+@keyframes blackToWhite {
+  from {
+    background-color: white;
+  }
+  to {
+    background-color: black;
+  }
+}
+
+@keyframes whiteToBlack {
+  from {
+    background-color: black;
+  }
+  to {
+    background-color: white;
+  }
 }
 
 #modal {

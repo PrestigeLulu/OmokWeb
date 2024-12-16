@@ -1,48 +1,49 @@
-// omokAi.js (또는 서버에서 AI 로직을 담당하는 파일)
-
+// omokAi.js
 const BOARD_SIZE = 19;
 
-// 간단한 가중치(점수) 표: 내 돌 연속 갯수, 상대 돌 연속 갯수 등
-// 실제로는 훨씬 세분화(예: 열린4, 3+3 등)하면 더 정교해집니다.
 const SCORE_TABLE = {
-  FIVE: 100000, // 이미 5목이면 최우선 (승리)
-  FOUR: 10000, // 4목
-  THREE: 1000, // 3목
-  TWO: 100, // 2목
-  ONE: 10, // 1목
+  FIVE: 100000,
+  FOUR: 10000,
+  THREE: 1000,
+  TWO: 100,
+  ONE: 10,
 };
 
-// 보드에서 돌 색깔을 나타내기 위한 상수
 const BLACK = "black";
 const WHITE = "white";
 const EMPTY = null;
 
-/**
- * 현재 보드 state를 바탕으로 AI가 둘 최적 수를 찾는 함수
- * (공격 및 수비를 동시에 고려)
- */
 function findBestMove(board, aiColor) {
   const opponentColor = aiColor === BLACK ? WHITE : BLACK;
 
   let bestScore = -Infinity;
   let bestMove = null;
 
-  // 모든 빈 칸에 대해 스코어를 계산해보고, 가장 높은 점수를 가진 칸을 선택
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       if (board[r][c] === EMPTY) {
-        // 가상으로 AI 돌을 놓아본 뒤 점수를 평가
+        // 1) 먼저 AI 돌을 놓았을 때 바로 5목이 되는지 체크
         board[r][c] = aiColor;
         const attackScore = evaluateBoard(board, aiColor, opponentColor);
 
-        // 다시 빈 칸으로 복원 후, 상대 돌을 놓아봤을 때(수비 관점) 점수를 평가
+        // 만약 점수가 5목 기준 이상이면(=SCORE_TABLE.FIVE 이상이면) 즉시 승리 수
+        if (attackScore >= SCORE_TABLE.FIVE) {
+          // 원복하고 바로 return
+          board[r][c] = EMPTY;
+          return { row: r, col: c };
+        }
+
+        // 2) 즉시 승리가 아니면 수비 점수도 계산
         board[r][c] = opponentColor;
         const defendScore = evaluateBoard(board, opponentColor, aiColor);
 
         // 복원
         board[r][c] = EMPTY;
 
+        // 3) 공격 + 수비 점수 합산
         const combinedScore = attackScore + defendScore;
+
+        // 최대 점수 갱신
         if (combinedScore > bestScore) {
           bestScore = combinedScore;
           bestMove = { row: r, col: c };
@@ -54,12 +55,6 @@ function findBestMove(board, aiColor) {
   return bestMove;
 }
 
-/**
- * board 상태를 평가(evaluation)하여 점수를 반환
- * - 내 돌이 연속되는 형태에 따라 점수를 부여
- * - 5목이 만들어질 수 있거나 이미 5목인 경우 점수가 매우 큼
- * - 이 함수가 제대로 동작하려면 가로/세로/대각선 체크를 모두 해야 함
- */
 function evaluateBoard(board, myColor, oppColor) {
   let score = 0;
 
@@ -77,8 +72,7 @@ function evaluateBoard(board, myColor, oppColor) {
     score += evaluateLine(colArray, myColor);
   }
 
-  // 대각선 평가 (두 방향)
-  // 1) ↘ 방향 대각선
+  // 대각선 평가 (↘)
   for (let startCol = 0; startCol < BOARD_SIZE; startCol++) {
     let diag = [];
     let r = 0,
@@ -102,7 +96,7 @@ function evaluateBoard(board, myColor, oppColor) {
     score += evaluateLine(diag, myColor);
   }
 
-  // 2) ↙ 방향 대각선
+  // 대각선 평가 (↙)
   for (let startCol = 0; startCol < BOARD_SIZE; startCol++) {
     let diag = [];
     let r = 0,
@@ -129,13 +123,9 @@ function evaluateBoard(board, myColor, oppColor) {
   return score;
 }
 
-/**
- * 일차원 배열(line)에서 연속된 돌의 개수를 세어 점수를 계산하는 함수
- * ex) line = [black, black, null, black, white, ...]
- */
 function evaluateLine(line, myColor) {
   let lineScore = 0;
-  let count = 0; // 내 돌 연속 개수
+  let count = 0;
 
   for (let i = 0; i < line.length; i++) {
     if (line[i] === myColor) {
@@ -147,7 +137,7 @@ function evaluateLine(line, myColor) {
       }
     }
   }
-  // line 끝났을 때 마지막에 연속개수가 있으면 추가
+  // 마지막에 남아있는 연속 개수 처리
   if (count > 0) {
     lineScore += getScoreByCount(count);
   }
@@ -155,12 +145,9 @@ function evaluateLine(line, myColor) {
   return lineScore;
 }
 
-/**
- * 연속 돌 개수에 따른 점수 환산
- */
 function getScoreByCount(count) {
   switch (count) {
-    case 5: // 이미 오목
+    case 5:
       return SCORE_TABLE.FIVE;
     case 4:
       return SCORE_TABLE.FOUR;
