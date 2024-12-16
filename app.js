@@ -105,10 +105,6 @@ io.on("connection", (socket) => {
         board[bestMove.row][bestMove.col] = aiColor;
         io.to(socket.id).emit("omok:update", board);
       }
-
-      if (checkWin(board, bestMove.row, bestMove.col, aiColor)) {
-        io.to(socket.id).emit("omok:win", { winner: aiColor });
-      }
     }
   });
 
