@@ -91,6 +91,14 @@ socket.on("omok:win", (data) => {
   document.getElementById("result").style.display = "flex";
 });
 
+socket.on(`set_pos_1`, (data) => {
+  console.log("set_pos_1", data);
+});
+
+socket.on(`set_pos_2`, (data) => {
+  console.log("set_pos_2", data);
+});
+
 document.getElementById("reset").addEventListener("click", () => {
   location.reload();
 });
