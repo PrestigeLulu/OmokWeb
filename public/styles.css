@@ -156,3 +156,15 @@ body {
   top: 10px;
   left: 10px;
 }
+
+#channel1 {
+  position: fixed;
+  top: 10px;
+  left: 80px;
+}
+
+#channel2 {
+  position: fixed;
+  top: 10px;
+  left: 120px;
+}

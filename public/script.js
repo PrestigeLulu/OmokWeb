@@ -4,7 +4,7 @@ const boardSize = 19;
 const board = document.getElementById("board");
 
 let TEST_MODE = false;
-let channel = 1;
+let channel = localStorage.getItem("channel") || 1;
 
 let playerTeam;
 let isBlackTurn = true; // 흑돌과 백돌 교차로 놓기 위한 변수
@@ -31,10 +31,12 @@ document.getElementById("white").addEventListener("click", () => {
 
 document.getElementById("channel1").addEventListener("click", () => {
   channel = 1;
+  localStorage.setItem("channel", 1);
 });
 
 document.getElementById("channel2").addEventListener("click", () => {
   channel = 2;
+  localStorage.setItem("channel", 2);
 });
 
 // 19x19 그리드 생성
